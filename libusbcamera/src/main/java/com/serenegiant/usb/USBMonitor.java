@@ -540,6 +540,8 @@ public final class USBMonitor {
 
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
+			System.out.println("[XXX]: " + intent.getAction());
+
 			if (destroyed) return;
 			final String action = intent.getAction();
 			if (ACTION_USB_PERMISSION.equals(action)) {

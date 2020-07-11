@@ -39,6 +39,8 @@ public class Mp4MediaMuxer {
         }else{
             mFilePath = path+".mp4";
         }
+        System.out.println("XXX video:" + mFilePath);
+
         Object mux = null;
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {

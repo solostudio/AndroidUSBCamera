@@ -58,8 +58,6 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
     public SeekBar mSeekBrightness;
     @BindView(R.id.seekbar_contrast)
     public SeekBar mSeekContrast;
-    @BindView(R.id.switch_rec_voice)
-    public Switch mSwitchVoice;
 
     private UVCCameraHelper mCameraHelper;
     private CameraViewInterface mUVCCameraView;
@@ -79,6 +77,7 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
                     mCameraHelper.requestPermission(0);
                 }
             }
+            showShortMsg("检测到设备");
         }
 
         @Override
@@ -87,7 +86,10 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
             if (isRequest) {
                 isRequest = false;
                 mCameraHelper.closeCamera();
-                showShortMsg(device.getDeviceName() + " is out");
+                showShortMsg(device.getDeviceName() + " 设备被拔出");
+
+                // RTMP Service
+                stopRecord();
             }
         }
 
@@ -98,7 +100,8 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
                 isPreview = false;
             } else {
                 isPreview = true;
-                showShortMsg("connecting");
+                //showShortMsg("connecting");
+
                 // initialize seekbar
                 // need to wait UVCCamera initialize over
                 new Thread(new Runnable() {
@@ -109,10 +112,16 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
+
+
+                        //
                         Looper.prepare();
                         if(mCameraHelper != null && mCameraHelper.isCameraOpened()) {
                             mSeekBrightness.setProgress(mCameraHelper.getModelValue(UVCCameraHelper.MODE_BRIGHTNESS));
                             mSeekContrast.setProgress(mCameraHelper.getModelValue(UVCCameraHelper.MODE_CONTRAST));
+
+                            // RTMP Service
+                            //startRecord();
                         }
                         Looper.loop();
                     }
@@ -122,9 +131,10 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
 
         @Override
         public void onDisConnectDev(UsbDevice device) {
-            showShortMsg("disconnecting");
+
         }
     };
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -170,6 +180,7 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
 
             }
         });
+
         mSeekContrast.setMax(100);
         mSeekContrast.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -243,53 +254,17 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
 
                 break;
             case R.id.menu_recording:
+                // TODO
+                showShortMsg("录像功能关闭");
+
                 if (mCameraHelper == null || !mCameraHelper.isCameraOpened()) {
-                    showShortMsg("sorry,camera open failed");
+                    //showShortMsg("sorry,camera open failed");
                     return super.onOptionsItemSelected(item);
                 }
-                if (!mCameraHelper.isPushing()) {
-                    String videoPath = UVCCameraHelper.ROOT_PATH + MyApplication.DIRECTORY_NAME +"/videos/" + System.currentTimeMillis()
-                            + UVCCameraHelper.SUFFIX_MP4;
 
-//                    FileUtils.createfile(FileUtils.ROOT_PATH + "test666.h264");
-                    // if you want to record,please create RecordParams like this
-                    RecordParams params = new RecordParams();
-                    params.setRecordPath(videoPath);
-                    params.setRecordDuration(0);                        // auto divide saved,default 0 means not divided
-                    params.setVoiceClose(mSwitchVoice.isChecked());    // is close voice
+                // RTMP Service
+                startRecord();
 
-                    params.setSupportOverlay(true); // overlay only support armeabi-v7a & arm64-v8a
-                    mCameraHelper.startPusher(params, new AbstractUVCCameraHandler.OnEncodeResultListener() {
-                        @Override
-                        public void onEncodeResult(byte[] data, int offset, int length, long timestamp, int type) {
-                            // type = 1,h264 video stream
-                            if (type == 1) {
-                                FileUtils.putFileStream(data, offset, length);
-                            }
-                            // type = 0,aac audio stream
-                            if(type == 0) {
-
-                            }
-                        }
-
-                        @Override
-                        public void onRecordResult(String videoPath) {
-                            if(TextUtils.isEmpty(videoPath)) {
-                                return;
-                            }
-                            new Handler(getMainLooper()).post(() -> Toast.makeText(USBCameraActivity.this, "save videoPath:"+videoPath, Toast.LENGTH_SHORT).show());
-                        }
-                    });
-                    // if you only want to push stream,please call like this
-                    // mCameraHelper.startPusher(listener);
-                    showShortMsg("start record...");
-                    mSwitchVoice.setEnabled(false);
-                } else {
-                    FileUtils.releaseFile();
-                    mCameraHelper.stopPusher();
-                    showShortMsg("stop record...");
-                    mSwitchVoice.setEnabled(true);
-                }
                 break;
             case R.id.menu_resolution:
                 if (mCameraHelper == null || !mCameraHelper.isCameraOpened()) {
@@ -307,6 +282,56 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void startRecord() {
+        if (!mCameraHelper.isPushing()) {
+            String videoPath = UVCCameraHelper.ROOT_PATH + MyApplication.DIRECTORY_NAME +"/videos/" + System.currentTimeMillis()
+             + ".UCR";
+            System.out.println(videoPath);
+
+            // FileUtils.createfile(FileUtils.ROOT_PATH + "test666.h264");
+            // if you want to record,please create RecordParams like this
+            RecordParams params = new RecordParams();
+            params.setRecordPath(videoPath);
+            params.setRecordDuration(0);    // auto divide saved,default 0 means not divided
+            params.setVoiceClose(true);    // is close voice
+            params.setSupportOverlay(true); // overlay only support armeabi-v7a & arm64-v8a
+
+            mCameraHelper.startPusher(params, new AbstractUVCCameraHandler.OnEncodeResultListener() {
+                @Override
+                public void onEncodeResult(byte[] data, int offset, int length, long timestamp, int type) {
+
+                    // type = 1,h264 video stream
+                    if (type == 1) {
+                        System.out.println("XX h264： " + type);
+                    }
+                    // type = 0,aac audio stream
+                    if(type == 0) {
+                        System.out.println("XX audio： " + type);
+                    }
+                }
+
+                @Override
+                public void onRecordResult(String videoPath) {
+                    if(TextUtils.isEmpty(videoPath)) {
+                        return;
+                    }
+                    //new Handler(getMainLooper()).post(() -> Toast.makeText(USBCameraActivity.this, "save videoPath:"+videoPath, Toast.LENGTH_SHORT).show());
+                }
+            });
+            // if you only want to push stream,please call like this
+            // mCameraHelper.startPusher(listener);
+
+            showShortMsg("XXX start record...");
+        }
+    }
+
+    private void stopRecord() {
+        FileUtils.releaseFile();
+        mCameraHelper.stopPusher();
+
+        showShortMsg("XXX stop record...");
     }
 
     private void showResolutionListDialog() {
@@ -365,6 +390,7 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
 
     private void showShortMsg(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+        System.out.println(msg);
     }
 
     @Override

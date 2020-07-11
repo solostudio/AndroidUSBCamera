@@ -686,16 +686,21 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                 File file = new File(videoPath);
                 if(! Objects.requireNonNull(file.getParentFile()).exists()) {
                     file.getParentFile().mkdirs();
+                    System.out.println("XXX mkdir:" + file.getParentFile());
                 }
+
                 mMuxer = new Mp4MediaMuxer(params.getRecordPath(),
                         params.getRecordDuration() * 60 * 1000, params.isVoiceClose());
             }
+
             // 启动视频编码线程
             startVideoRecord();
+
             // 启动音频编码线程
             if (params != null && !params.isVoiceClose()) {
                 startAudioRecord();
             }
+
             callOnStartRecording();
         }
 
@@ -707,6 +712,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                 mMuxer = null;
                 Log.i(TAG, TAG + "---->停止本地录制");
             }
+
             // 停止音视频编码线程
             stopAudioRecord();
             stopVideoRecord();
@@ -717,8 +723,10 @@ public abstract class AbstractUVCCameraHandler extends Handler {
 //				mUVCCamera.stopCapture();
 //			}
             mWeakCameraView.get().setVideoEncoder(null);
+
             // you should not wait here
             callOnStopRecording();
+
             // 返回路径
             if (mListener != null) {
                 mListener.onRecordResult(videoPath + ".mp4");
@@ -731,11 +739,13 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                 @Override
                 public void onEncodeResult(byte[] data, int offset, int length, long timestamp) {
                     if (mListener != null) {
+                        System.out.println("XXX video:" + length);
                         mListener.onEncodeResult(data, offset, length, timestamp, 1);
                     }
                 }
             });
             mH264Consumer.start();
+
             // 添加混合器
             if (mMuxer != null) {
                 if (mH264Consumer != null) {
@@ -772,6 +782,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                 }
             });
             mAacConsumer.start();
+
             // 添加混合器
             if (mMuxer != null) {
                 if (mAacConsumer != null) {

@@ -91,7 +91,6 @@ public class H264EncodeConsumer extends Thread {
                     Thread.sleep(time / 2);
             }
             // 将数据写入编码器
-
             feedMediaCodecData(nv12ToNV21(yuvData, mWidth, mHeight));
 
             if (time > 0)
@@ -132,6 +131,7 @@ public class H264EncodeConsumer extends Thread {
     @SuppressLint("WrongConstant")
     @Override
     public void run() {
+        System.out.println("XXX 编码器");
         if (!isEncoderStart) {
             startMediaCodec();
         }
@@ -243,6 +243,7 @@ public class H264EncodeConsumer extends Thread {
             return;
         }
 
+        System.out.println("XXX MIME_TYPE: " + MIME_TYPE);
         final MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, mWidth, mHeight);
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT, mColorFormat);
         format.setInteger(MediaFormat.KEY_BIT_RATE, calcBitRate());
@@ -257,7 +258,8 @@ public class H264EncodeConsumer extends Thread {
         mMediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
         mMediaCodec.start();
 
-
+        System.out.println("XXX Build.VERSION.SDK_INT: " + Build.VERSION.SDK_INT);
+        System.out.println("XXX Build.VERSION_CODES.LOLLIPOP: " + Build.VERSION_CODES.LOLLIPOP);
         isEncoderStart = true;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP + 1) {
             inputBuffers = outputBuffers = null;
