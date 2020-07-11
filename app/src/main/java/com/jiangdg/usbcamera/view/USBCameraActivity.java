@@ -121,7 +121,7 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
                             mSeekContrast.setProgress(mCameraHelper.getModelValue(UVCCameraHelper.MODE_CONTRAST));
 
                             // RTMP Service
-                            //startRecord();
+                            startRecord();
                         }
                         Looper.loop();
                     }
@@ -262,9 +262,6 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
                     return super.onOptionsItemSelected(item);
                 }
 
-                // RTMP Service
-                startRecord();
-
                 break;
             case R.id.menu_resolution:
                 if (mCameraHelper == null || !mCameraHelper.isCameraOpened()) {
@@ -286,8 +283,7 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
 
     private void startRecord() {
         if (!mCameraHelper.isPushing()) {
-            String videoPath = UVCCameraHelper.ROOT_PATH + MyApplication.DIRECTORY_NAME +"/videos/" + System.currentTimeMillis()
-             + ".UCR";
+            String videoPath = UVCCameraHelper.ROOT_PATH + MyApplication.DIRECTORY_NAME +"/videos/" + System.currentTimeMillis() + ".UCR";
             System.out.println(videoPath);
 
             // FileUtils.createfile(FileUtils.ROOT_PATH + "test666.h264");
@@ -295,7 +291,7 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
             RecordParams params = new RecordParams();
             params.setRecordPath(videoPath);
             params.setRecordDuration(0);    // auto divide saved,default 0 means not divided
-            params.setVoiceClose(true);    // is close voice
+            params.setVoiceClose(false);    // is close voice
             params.setSupportOverlay(true); // overlay only support armeabi-v7a & arm64-v8a
 
             mCameraHelper.startPusher(params, new AbstractUVCCameraHandler.OnEncodeResultListener() {
@@ -323,7 +319,7 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
             // if you only want to push stream,please call like this
             // mCameraHelper.startPusher(listener);
 
-            showShortMsg("XXX start record...");
+            showShortMsg("启动推流 ...");
         }
     }
 
@@ -331,7 +327,7 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
         FileUtils.releaseFile();
         mCameraHelper.stopPusher();
 
-        showShortMsg("XXX stop record...");
+        showShortMsg("停止推流 ...");
     }
 
     private void showResolutionListDialog() {

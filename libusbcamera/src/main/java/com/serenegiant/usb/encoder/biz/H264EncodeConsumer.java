@@ -110,6 +110,7 @@ public class H264EncodeConsumer extends Thread {
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }
+
         if (bufferIndex >= 0) {
             ByteBuffer buffer;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -131,7 +132,7 @@ public class H264EncodeConsumer extends Thread {
     @SuppressLint("WrongConstant")
     @Override
     public void run() {
-        System.out.println("XXX 编码器");
+        System.out.println("编码器");
         if (!isEncoderStart) {
             startMediaCodec();
         }
