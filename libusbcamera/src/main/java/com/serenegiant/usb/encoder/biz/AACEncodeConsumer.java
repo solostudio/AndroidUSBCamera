@@ -235,7 +235,8 @@ public class AACEncodeConsumer extends Thread{
                     mBuffer.flip();
                     // 将AAC回调给MainModelImpl进行push
                     if(listener != null){
-                        Log.i(TAG,"----->得到aac数据流<-----");
+                        // TODO
+                        //Log.i(TAG,"----->得到aac数据流<-----");
                         listener.onEncodeResult(mBuffer.array(),0, mBufferInfo.size + 7, mBufferInfo.presentationTimeUs / 1000);
                     }
                 }

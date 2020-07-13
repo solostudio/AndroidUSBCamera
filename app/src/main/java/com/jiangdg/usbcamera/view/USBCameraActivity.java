@@ -12,6 +12,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Surface;
+import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -77,7 +79,7 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
                     mCameraHelper.requestPermission(0);
                 }
             }
-            showShortMsg("检测到设备");
+            showShortMsg("检测到设备: " + device.getDeviceId());
         }
 
         @Override
@@ -153,7 +155,8 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
         mCameraHelper.setOnPreviewFrameListener(new AbstractUVCCameraHandler.OnPreViewResultListener() {
             @Override
             public void onPreviewResult(byte[] nv21Yuv) {
-                Log.d(TAG, "onPreviewResult: "+nv21Yuv.length);
+                // TODO
+                //Log.d(TAG, "onPreviewResult: "+nv21Yuv.length);
             }
         });
     }
@@ -283,10 +286,13 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
 
     private void startRecord() {
         if (!mCameraHelper.isPushing()) {
+            //
+            String rtspCamera = "rtsp://192.168.0.104:554/demo";
+
+            //
             String videoPath = UVCCameraHelper.ROOT_PATH + MyApplication.DIRECTORY_NAME +"/videos/" + System.currentTimeMillis() + ".UCR";
             System.out.println(videoPath);
 
-            // FileUtils.createfile(FileUtils.ROOT_PATH + "test666.h264");
             // if you want to record,please create RecordParams like this
             RecordParams params = new RecordParams();
             params.setRecordPath(videoPath);
@@ -300,11 +306,11 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
 
                     // type = 1,h264 video stream
                     if (type == 1) {
-                        System.out.println("XX h264： " + type);
+                        //System.out.println("XX h264： " + type);
                     }
                     // type = 0,aac audio stream
                     if(type == 0) {
-                        System.out.println("XX audio： " + type);
+                        //System.out.println("XX audio： " + type);
                     }
                 }
 
@@ -324,6 +330,7 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
     }
 
     private void stopRecord() {
+        //
         FileUtils.releaseFile();
         mCameraHelper.stopPusher();
 
