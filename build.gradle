@@ -18,7 +18,7 @@ allprojects {
         flatDir {
             dirs '../aars'
         }
-        maven { url 'http://raw.github.com/saki4510t/libcommon/master/repository/' }
+        maven { url 'https://raw.github.com/saki4510t/libcommon/master/repository/' }
         maven { url 'https://jitpack.io' }
         jcenter()
     }
